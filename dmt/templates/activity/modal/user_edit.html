@@ -1,0 +1,78 @@
+<form id="ips_form" onsubmit="return false;">
+    <div class="form_row">
+        <label for="new_ip">Add new user</label>
+        <div class="field_wrap">
+            <input type="text" name="email" id="email" value="" />
+            <button type="button" class="btn_big btn_blue" onclick="javascript:user_add(link_to_edit_users_{{ pk }}, $('#email').attr('pk'));">Add</button>
+        </div>
+        <p id="err_text"></p>
+        <div class="form_row fleft">
+            <div class="scroll_block">
+                <table class="add_tbl_user" id="user_list">
+                    <thead>
+                        <tr>
+                            <th>Email's</th>
+                            <th>apikey's</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Include -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+load_user_list(link_to_load_user_list_{{ pk }});
+$('#email').attr('pk', 0).autocomplete({
+    source: function(request, response){
+        $.getJSON(link_to_sug_user_{{ pk }}, {'email': $('#email').val()}, function (data) {
+            response($.map(data, function (item){
+                return {
+                    pk: item.pk,
+                    label: item.email
+                }
+            }));
+        });
+    },
+    minLength: 1,
+    select: function(event, ui) {
+        $('#email').attr('pk', ui.item.pk);
+    }
+});
+function user_add(url, pk){
+    $('#err_text').hide();
+    $.getJSON(url, {'pk': pk}, function (data) {
+        $('#email').val('');
+        if(data.error) {
+            $('#err_text').text(data.message).show();
+        }
+        load_user_list(link_to_load_user_list_{{ pk }});
+    });
+}
+function user_status_change(pk) {
+    $('#err_text').hide();
+    $.getJSON(link_to_status_change_user, {'pk': pk}, function (data) {
+       if(data.error) {
+            $('#err_text').text(data.message).show();
+        }
+        load_user_list(link_to_load_user_list_{{ pk }});
+    });
+}
+{% if remove %}
+function user_remove(url,pk) {
+    $('#err_text').hide();
+    $.getJSON(url, {'pk': pk}, function (data) {
+       if(data.error) {
+            $('#err_text').text(data.message).show();
+        }
+        load_user_list(link_to_load_user_list_{{ pk }});
+    });
+}
+{% endif %}
+function load_user_list(url) {
+    $("#user_list > tbody").load(url);
+    $('#error').hide();
+}
+</script>

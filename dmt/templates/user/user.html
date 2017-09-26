@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>User manage</title>
+	<link rel="stylesheet" href="http://dev.dcapi.net/media/dmt/route/css/ready.css">
+	<link rel="stylesheet" href="http://dev.dcapi.net/media/dmt/route/css/style.css">
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://dev.dcapi.net/media/dmt/route/js/script.js"></script>
+
+</head>
+<body>
+	<header class="header">
+			<a href="#" class="logo block fleft transition">
+				<span class="logo_deliverability">DELIVERABILITY</span><br>
+				MANAGMENT <span class="logo_tool">TOOL</span>
+			</a>
+			<a href="#" class="dashboard block fleft transition">
+				<div class="header_text_margin">
+					DASHBOARD
+				</div>
+			</a>
+				<div class="route_humburger"></div>
+			<div class="route_humburger_menu ">
+				<a href="{% url 'dmt:route-activity' %}">POOL ACTIVITY</a>
+				<a href="#">QUEUE</a>
+				<a href="#">IP MANAGEMENT</a>
+				<a href="{% url 'dmt:user' %}">USER MANAGEMENT</a>
+				<a href="#">ABUSE</a>
+				<a href="#">THROTTLES TAB</a>
+				<a href="{% url 'dmt:route' %}">POOL MANAGEMENT</a>
+			</div>
+			<ul class="header_menu">
+				<li><a href="{% url 'dmt:route-activity' %}">POOL ACTIVITY</a></li>
+				<li><a href="#">QUEUE</a></li>
+				<li><a href="#">IP MANAGEMENT</a></li>
+				<li><a href="{% url 'dmt:user' %}">USER MANAGEMENT</a></li>
+				<li><a href="#">ABUSE</a></li>
+				<li><a href="#">THROTTLES TAB</a></li>
+				<li><a href="{% url 'dmt:route' %}">POOL MANAGEMENT</a></li>
+			</ul>
+
+			<div class="client_header fright">
+				<div class="client_photo">
+					<img src="http://dev.dcapi.net/media/dmt/route/images/empty_client.png" alt="">
+				</div>
+				<div class="client_fio">Ivan Durkov</div>			
+			</div>
+	</header>
+
+	<div class="wrapper">
+
+		<section class="route_s1">
+			<form class="route_search_form" action="{% url 'dmt:user' %}" method="get">
+				<input id="route_search" name="q" type="search" placeholder="">
+				<div class="transition">
+					<input id="route_search_submit" type="submit" value="">
+				</div>
+			</form>
+		</section>
+
+		<section class="route_s2 transition">
+			<a href="{% url 'dmt:route-activity' %}" class="">
+				<img src="http://dev.dcapi.net/media/dmt/route/images/arrow_left.png" alt="">
+				RETURN TO FILTER ROUTE
+			</a>
+		</section>
+
+		<section class="route_s3"> 
+			<h1 class="route_h1">
+				USER MANAGE
+			</h1>
+
+			<ul class="route_list">
+				<li>
+					<div class="route_list_pool" style="width:300px">EMAIL</div>
+					<div class="route_list_name" style="width:350px">APIKEY</div>
+				</li>
+                {% for user in users %}
+				<li>
+					<div class="route_list_pool" style="width:300px"><a href="{% url 'dmt:user-edit' user.pk %}">{{ user.email }}</a></div>
+					<div class="route_list_name" style="width:350px">{{ user.key }}</div>
+				</li>
+                {% empty %}
+				<li>
+                    <p>User not found</p>
+				</li>
+                {% endfor %}
+			</ul>
+		</section>
+
+	</div>
+<footer class="route_footer"></footer>
+</body>
+</html>

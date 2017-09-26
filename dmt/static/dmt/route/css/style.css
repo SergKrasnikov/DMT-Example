@@ -1,0 +1,243 @@
+html{
+	font-family: 'Open Sans', sans-serif;
+	height: 100%;
+}
+a{text-decoration: none;}
+section{ margin-top: 10px; }
+body{
+	background-color: #f1f1f1;
+	color: #2a3d4d;
+}
+.wrapper{
+	position: relative;
+}
+/*-------header------------*/
+.header{
+	width: 100%;
+	height: 60px;
+	box-shadow: 0 2px 2px #d7d9d9;
+	background-color: #fff;
+}
+
+.logo{
+	cursor: pointer;
+	width: 147px;
+	height: 50px;
+	padding: 10px 0 0 10px;
+	background-color: #2a3d4d;
+	font-size: 12px;
+	color: #fff;
+}
+.logo:hover{background-color: #364e62;}
+.logo_deliverability{
+	font-size: 18px;
+	line-height: 20px;
+}
+.logo_tool{
+	color: #35a6ba;
+}
+
+.header_text_margin{
+	margin:20px;
+}
+.dashboard{
+	background-color: #35a6ba;
+	cursor: pointer;
+	height: 60px;
+	font-size: 14px;
+	color: #fff;
+}
+.dashboard:hover{
+	background-color: rgba(67,188,211,0.9);
+}
+
+.header_menu li{
+	list-style: none;
+	float: left;
+	margin: 20px;
+}
+.header_menu li a{ font-size: 14px; color: #2a3d4d; }
+.header_menu li a:hover{ color: #35a6ba; }
+
+.client_header{
+	background-color: #d9d9d9;
+	height: 60px;
+}
+.client_header{
+	display: -webkit-box;
+	display: -moz-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: box;
+	display: flexbox;
+	display: flex;
+	-webkit-flex-direction: row;
+	flex-direction: row;
+	-webkit-align-items: center;
+	align-items: center;
+
+	max-width: 142px;
+}
+.client_header>div{
+	margin-right: 10px;
+}
+.client_photo{
+	margin-left: 10px;
+}
+.client_photo img{
+	max-width: 36px;
+	max-height: 36px;
+	border-radius: 50%;
+}
+/*------route_s1------*/
+.route_search_form{
+	padding: 0 10px 0 10px;
+	position: relative;
+}
+#route_search{
+	width: 100%;
+	height: 40px;
+	border: 2px solid #d7d9d9;
+	border-radius: 2px;
+	padding-left: 10px;
+	color: #2a3d4d;
+}
+#route_search_submit{
+	position: absolute;
+	right: 10px;
+	top: 0;
+	height: 40px;
+	width: 40px;
+	background-color: #35a6ba;
+	background-image: url(../images/search.png);
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	cursor: pointer;
+	border: 1px solid #d7d9d9;
+	border-radius: 2px;
+}
+#route_search_submit:hover{
+	background-color: rgba(67,188,211,0.9);
+}
+/*---------route_s2-------*/
+.route_s2{margin-top: 16px !important;}
+.route_s2 a{
+	font-size: 14px;
+	color: #fff;
+	background-color: #35a6ba;
+	margin-left: 10px;
+	padding: 6px 10px 6px 10px;
+}
+.route_s2 a:hover{
+	background-color: rgba(67,188,211,0.9);
+}
+/*--------route_s3-----------*/
+.route_s3{
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-top: 19px;
+	padding-top: 20px;
+	background-color: #fff;
+}
+.route_h1{
+	margin-left: 20px; 
+	font-weight: 300;
+}
+
+.route_list{
+	margin-top: 20px;
+}
+.route_list li{
+	list-style: none;
+	display: inline-block;
+	width: 100%;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.route_list li:first-child{
+	color: #808080;
+	border-bottom: 1px solid #f1f1f1;
+}
+.route_list li:nth-child(2n+3){
+	background-color: #fafafa;
+}
+.route_list li div{	float: left;}
+.route_list li div a{	
+	text-decoration: underline;
+	color: #35a6ba;
+}
+.route_list li div a:hover{
+	text-decoration: none;
+}	
+.route_list_pool{	width: 90px; margin-left: 20px;}
+.route_list_name{	width: 130px;}
+.route_list_ips{ width: 40px;}
+.ip_num_block{width: 70%; display: none;}
+.ip_num{ margin-left: 20px;}
+/*------------------footer--route_footer---*/
+.route_footer{
+	height: 50px;
+	width: 100%;
+	background-color: #2a3d4d;
+	bottom: 0;
+	margin-top: 50px;
+}
+/*---------------------adaptive------*/
+.route_humburger{
+	display: none;
+	background-image: url(../images/hamburger.jpg);
+	height: 60px;
+	width: 52px;
+	float: left;
+	cursor: pointer;
+	border-right: 1px solid #f1f1f1;
+}
+.route_humburger:hover{
+	background-image: url(../images/hamburger2.jpg);
+}
+.route_humburger_menu{
+	display: none;
+	width: 250px;
+	position: absolute;
+	left: 84px;
+	top: 60px;
+	background-color: rgba(40,49,66,0.9);
+	float: right;
+	z-index: 999;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.route_humburger_menu a{
+	display: block;
+	height: 30px;
+	padding-top: 10px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	text-align: center;
+	color: #9498a1;
+}
+.route_humburger_menu a:hover {
+	background-color: #212a39;
+	color: #fff;
+}
+/*------------media---------*/
+@media screen and (min-width: 1280px) {
+	.client_header{max-width: 190px;}
+}
+@media screen and (max-width: 1279px) {
+	.route_humburger{display: block;}
+	.header_menu{display: none;}
+}
+@media screen and (max-width: 960px) {
+	.ip_num_block{width: 50%;}
+}
+@media screen and (max-width: 600px) {
+	.ip_num_block{
+		margin-top: 20px;
+		width: 100%;
+	}
+}
+@media screen and (max-width: 480px) {
+	.logo{display: none;}
+	.route_humburger_menu {left: 24px;}
+}

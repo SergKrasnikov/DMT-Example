@@ -1,0 +1,345 @@
+<form id="create_pool_form" onsubmit="return editRoute(l{% url 'dmt:route-edit' pk %})">{% csrf_token %}
+    <div class="form_row" style="margin-bottom:5px;">
+        <label for="id_name">Route name: </label>
+        <div class="field_wrap">
+            {{ form.name }}
+        </div>
+        <label for="id_mta">Mta: </label>
+        <div class="field_wrap">
+            {{ form.mta }}
+        </div>
+    </div>
+    <div class="form_buttons" style="margin-bottom:5px;">
+        <button type="submit" class="btn_big btn_blue">Save</button>
+        <button type="button" class="btn_big btn_trans_red" onclick="closeModal()">Cancel</button>
+    </div>
+    <div class="form_row" style="margin-bottom:75px;">
+        <div id="ip" style="float:left;padding:0 10px;width:300px;">
+            <label for="new_ip">Add new IP</label>
+            <div class="field_wrap">
+                <input type="text"
+                       name="addr"
+                       id="addr"
+                       class="ip_inp ui-autocomplete-input"
+                       autocomplete="off"
+                       value="" />
+                <button type="button" class="btn_big btn_blue" onClick="javascript:ip_add($('#addr').val());">Add</button>
+            </div>
+            <p id="ip_err_text"></p>
+        </div>
+        <div id="user" style="float:left;padding:0 10px;width:300px;">
+            <label for="new_ip">Add new user</label>
+            <div class="field_wrap">
+                <input type="text" name="email" id="email" value="" />
+                <button type="button" class="btn_big btn_blue" onClick="javascript:user_add($('#email').attr('pk'));">Add</button>
+            </div>
+            <p class="user_err_text"></p>
+        </div>
+    </div>
+</form>
+<div id="route_refresh_window">
+    <!-- Include -->
+</div>
+<script>
+
+if(typeof jQuery=='undefined') {
+    var headTag = document.getElementsByTagName("head")[0];
+    var jqTag = document.createElement('script');
+    jqTag.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js';
+    jqTag.onload = jQueryCode;
+    headTag.appendChild(jqTag);
+} else {
+    jQueryCode();
+}
+function jQueryCode() {
+    lists_refresh();
+
+    if (typeof jQuery.ui == 'undefined') {
+        var jq_ui_Tag = document.createElement('script');
+        jq_ui_Tag.src = 'http://dev.dcapi.net/media/js/jquery-ui.min.js';
+        jq_ui_Tag.onload = jQuery_ui_Code;
+        headTag.appendChild(jq_ui_Tag);
+    } else {
+        jQuery_ui_Code();
+    }
+}
+function jQuery_ui_Code() {
+    $('#email').attr('pk', 0).autocomplete({
+        source: function(request, response){
+            $.getJSON('{% url 'dmt:sug-user' pk %}', {'email': $('#email').val()}, function (data) {
+                response($.map(data, function (item) {
+                    return {
+                        pk: item.pk,
+                        label: item.email
+                    }
+                }));
+            });
+        },
+        minLength: 1,
+        select: function(event, ui){
+            $('#email').attr('pk', ui.item.pk);
+        }
+    });
+/*    $('#addr').attr('pk', 0).autocomplete({
+        source: function(request, response){
+            $.getJSON('{% url 'dmt:sug-ip' %}', {'addr': $('#addr').val()}, function (data) {
+                response($.map(data, function (item) {
+                    return {
+                        pk: item.pk,
+                        label: item.addr
+                    }
+                }));
+            });
+        },
+        minLength: 2,
+        select: function(event, ui){
+            $('#addr').attr('pk', ui.item.pk);
+        }
+    });*/
+    $('#addr').attr('pk', 0).autocomplete({
+        minLength: 0,
+        source: function ( request, response ) {
+            var addr = $('#addr').val();
+            if (addr == '') {addr = '*'}
+            console.log(addr);
+            $.getJSON('{% url 'dmt:sug-ip' %}', {'addr': addr}, function (data) {
+                response($.map(data, function (item) {
+                    return {
+                        pk: item.pk,
+                        label: item.addr
+                    }
+                }));
+            })
+        },
+        focus: function( event, ui ) {
+            $( "#addr" ).val( ui.item.label );
+            return false;
+          },
+        select: function(event, ui){
+            $('#addr').attr('pk', ui.item.pk);
+        }
+    }).bind('dblclick', function () {
+        $(this).autocomplete('search', '');
+    })
+}
+function lists_refresh() {
+    $("#route_refresh_window").load('{% url 'dmt:lists-refresh' pk %}', function(responseText, textStatus, XMLHttpRequest) {
+        recalcHeight();
+    });
+    $('#error').hide();
+}
+function recalcHeight() {
+    var heights = [$('#ip_list').height()+10, $('#user_list').height()+10];
+    var height_refresh = Math.max.apply(null, heights);
+
+    var height_head=$('#edit_route_window > .modal_window_top').height() + $('#edit_route_window > .modal_body').height() - $('#route_refresh_window').height();
+
+    height_window = $(window).height();
+    height_modal_window = height_window / 100 * 80;
+
+    if (height_modal_window < 762) { height_modal_window = 762 }
+
+    if ((height_refresh + height_head) < 762) { height_modal_window = height_refresh + height_head }
+
+    var top=($(window).height() - (height_modal_window))/2;
+
+    /*$('#edit_route_window').css('height', height_modal_window).css('top', top+'px');
+
+    if (height_refresh + height_head + 10 > height_modal_window) {
+
+        if ($('#ip_list_table').height() > height_modal_window - height_head) {
+            $('#ip_list').css('height', (height_modal_window - height_head)+'px').css('overflow-y', 'scroll').css('overflow-x', 'hidden');
+        } else {
+            $('#ip_list').css('height', $('#ip_list_table').height()).css('overflow-y', 'hidden').css('overflow-x', 'hidden');
+        }
+
+        if ($('#user_list_table').height() > height_modal_window - height_head) {
+            $('#user_list').css('height', (height_modal_window - height_head)+'px').css('overflow-y', 'scroll').css('overflow-x', 'hidden');
+        } else {
+            $('#user_list').css('height', $('#user_list_table').height()).css('overflow-y', 'hidden').css('overflow-x', 'hidden');
+        }
+    }*/
+    $('#user_list, #ip_list').css({
+        'max-height' : $(window).height()-60-height_head,
+        'overflow' : 'auto'
+    });
+}
+
+function func_ip_first_add(addr) {
+    $.getJSON('{% url 'dmt:ip-add' pk %}', {'addr': addr, 'confirm': false}, function(data) {
+        closeMyConfirmFirstAdd();
+        $('#addr').val('');
+        if(data.error) {
+            myAlert(data.message, 'Error', 'info');
+        }
+        var tag_p = '';
+        var addrs = '';
+        $.each(data.ip_in_route, function(key, value) {
+            tag_p += '<p>route_id: '+key+' -> Ip addr: '+value.addr+' # route name: '+value.route+'</p>';
+            addrs += value.addr+',';
+        });
+        if(tag_p != '') {
+            myConfirmSecondAdd(tag=tag_p, addr=addrs);
+        }
+        lists_refresh();
+    });
+}
+function func_ip_second_add(addr) {
+    $.getJSON('{% url 'dmt:ip-add' pk %}', {'addr': addr, 'confirm': true}, function(data) {
+        $('#addr').val('');
+        if(data.error) {
+            myAlert(data.message, 'Error', 'info');
+        }
+        lists_refresh();
+        closeMyConfirmSecondAdd();
+    });
+}
+function ip_add(addr) {
+    $('#ip_err_text').hide();
+    myConfirmFirstAdd(addr=addr);
+}
+function func_ip_exclude(ip) {
+    $.getJSON('{% url 'dmt:ip-exclude' pk %}', {'ip': ip}, function(data) {
+        $('#addr').val('');
+        if(data.error) {
+            myAlert(data.message, 'Error', 'info');
+        }
+        lists_refresh();
+        closeMyConfirmExclude();
+    });
+}
+function ip_exclude(ip) {
+    $('#ip_err_text').hide();
+    myConfirmExclude(addr=ip);
+}
+
+function user_add(pk) {
+    $('#user_err_text').hide();
+    $.getJSON('{% url 'dmt:user-add' pk %}', {'pk': pk}, function (data) {
+        $('#email').val('');
+        if(data.error) {
+            myAlert(data.message, 'Error', 'info');
+        }
+        lists_refresh();
+    });
+}
+function user_status_change(pk) {
+    $('#user_err_text').hide();
+    $.getJSON('{% url 'dmt:user-status-change' %}', {'pk': pk}, function (data) {
+       if(data.error) {
+            myAlert(data.message, 'Error', 'info');
+        }
+        lists_refresh();
+    });
+}
+{% if remove %}
+function user_remove(pk) {
+    $('#user_err_text').hide();
+    $.getJSON('{% url 'dmt:ip-remove' %}', {'pk': pk}, function (data) {
+       if(data.error) {
+            myAlert(data.message, 'Error', 'info');
+        }
+        lists_refresh();
+    });
+}
+{% endif %}
+
+function myConfirmExclude(addr) {
+    var html = '<div class="modal_window middle_modal_window" id="confirm_modal_exclude">' +
+                   '<div class="modal_window_top err">' +
+                       '<div class="modal_window_title">Подтверждение удаления IP адреса</div>' +
+                       '<div class="modal_window_close" >' +
+                           '<a href="javascript:void(0)" class="close_icon" onClick="closeMyConfirmExclude()"></a>' +
+                       '</div>' +
+                       '<div class="clr"></div>' +
+                   '</div>'+
+                   '<div class="modal_content_wrapper">' +
+                       '<div class="text" id="modal_text">Вы уверены, что хотите удалить IP: '+addr+'</div>' +
+                       '<div class="modal_window_bottom form_buttons">' +
+                           '<button type="button" class="btn_big btn_blue" onClick="javascript:func_ip_exclude(\''+addr+'\');">Да</button>' +
+                           '<button type="button" class="btn_big btn_trans_red" onClick="closeMyConfirmExclude()">Cancel</button>' +
+                       '</div>' +
+                   '</div>' +
+               '</div>';
+    $("body").append(html);
+    $("#confirm_shadow").height($(document).height()).css({'opacity':'0', 'display':'block'});
+    $("#confirm_shadow").animate({'opacity':'0.65'}, 500);
+    var top = ($(window).height()-$("#confirm_modal_exclude").height())/2;
+    if(top<0){top=50;}
+    $("#confirm_modal_exclude").css('left','50%').animate({top:top+'px'}, 500, "easeOutBack");
+    $("#confirm_modal_exclude").draggable({
+        handle:"div.modal_window_title"
+    });
+}
+function closeMyConfirmExclude(){
+    $("#confirm_modal_exclude").animate({top:'-150%'}, 500, "easeInBack");
+    $("#confirm_shadow").animate({opacity:'0'}, 500);
+    setTimeout('$("#confirm_shadow").css("display", "none");$("#confirm_modal_exclude").remove();', 500);
+}
+
+function myConfirmFirstAdd(addr) {
+    var html = '<div class="modal_window middle_modal_window" id="confirm_modal_first_add">' +
+                   '<div class="modal_window_top err">' +
+                       '<div class="modal_window_title">Подтверждение добавлнения IP адреса</div>' +
+                       '<div class="modal_window_close" >' +
+                           '<a href="javascript:void(0)" class="close_icon" onClick="closeMyConfirmFirstAdd()"></a>' +
+                       '</div>' +
+                       '<div class="clr"></div>' +
+                   '</div>'+
+                   '<div class="modal_content_wrapper">' +
+                       '<div class="text" id="modal_text">Вы уверены, что хотите добавить IP: '+addr+'</div>' +
+                       '<div class="modal_window_bottom form_buttons">' +
+                           '<button type="button" class="btn_big btn_blue" onClick="javascript:func_ip_first_add(\''+addr+'\');">Да</button>' +
+                           '<button type="button" class="btn_big btn_trans_red" onClick="closeMyConfirmFirstAdd()">Cancel</button>' +
+                       '</div>' +
+                   '</div>' +
+               '</div>';
+    $("body").append(html);
+    $("#confirm_shadow").height($(document).height()).css({'opacity':'0', 'display':'block'});
+    $("#confirm_shadow").animate({'opacity':'0.65'}, 500);
+    var top = ($(window).height()-$("#confirm_modal_first_add").height())/2;
+    if(top<0){top=50;}
+    $("#confirm_modal_first_add").css('left','50%').animate({top:top+'px'}, 500, "easeOutBack");
+    $("#confirm_modal_first_add").draggable({
+        handle:"div.modal_window_title"
+    });
+}
+function closeMyConfirmFirstAdd(){
+    $("#confirm_modal_first_add").animate({top:'-150%'}, 500, "easeInBack");
+    $("#confirm_shadow").animate({opacity:'0'}, 500);
+    setTimeout('$("#confirm_shadow").css("display", "none");$("#confirm_modal_first_add").remove();', 500);
+}
+
+function myConfirmSecondAdd(tag, addr) {
+    var html = '<div class="modal_window middle_modal_window" id="confirm_modal_second_add">' +
+                   '<div class="modal_window_top err">' +
+                       '<div class="modal_window_title">Подтверждение добавлнения IP адреса</div>' +
+                       '<div class="modal_window_close" >' +
+                           '<a href="javascript:void(0)" class="close_icon" onClick="closeMyConfirmSecondAdd()"></a>' +
+                       '</div>' +
+                       '<div class="clr"></div>' +
+                   '</div>'+
+                   '<div class="modal_content_wrapper">' +
+                       '<div class="text" id="modal_text">Вы уверены, что хотите добавить IP: '+tag+'</div>' +
+                       '<div class="modal_window_bottom form_buttons">' +
+                           '<button type="button" class="btn_big btn_blue" onClick="javascript:func_ip_second_add(\''+addr+'\');">Да</button>' +
+                           '<button type="button" class="btn_big btn_trans_red" onClick="closeMyConfirmSecondAdd()">Cancel</button>' +
+                       '</div>' +
+                   '</div>' +
+               '</div>';
+    $("body").append(html);
+    setTimeout(function() { $("#confirm_shadow").height($(document).height()).css({'opacity':'0', 'display':'block'}); }, 600 );
+    $("#confirm_shadow").animate({'opacity':'0.65'}, 500);
+    var top = ($(window).height()-$("#confirm_modal_second_add").height())/2;
+    if(top<0){top=50;}
+    $("#confirm_modal_second_add").css('left','50%').animate({top:top+'px'}, 500, "easeOutBack");
+    $("#confirm_modal_second_add").draggable({
+        handle:"div.modal_window_title"
+    });
+}
+function closeMyConfirmSecondAdd(){
+    $("#confirm_modal_second_add").animate({top:'-150%'}, 500, "easeInBack");
+    $("#confirm_shadow").animate({opacity:'0'}, 500);
+    setTimeout('$("#confirm_shadow").css("display", "none");$("#confirm_modal_second_add").remove();', 500);
+}
+</script>

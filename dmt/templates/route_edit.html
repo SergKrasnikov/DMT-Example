@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script>
+    var link_to_edit_ip_{{ pk }} = "{% url 'dmt:ip-add' pk %}";
+    var link_to_load_ip_list_{{ pk }} = "{% url 'dmt:ip-list' pk %}";
+    var link_to_load_ip_active_list_{{ pk }} = "{% url 'dmt:ip-active-list' pk %}";
+    var link_to_load_ip_released_list_{{ pk }} = "{% url 'dmt:ip-released-list' pk %}";
+    var link_to_load_ip_exclude_{{ pk }} = "{% url 'dmt:ip-exclude' pk %}";
+
+    var link_to_sug_user_{{ pk }} = "{% url 'dmt:sug-user' pk %}";
+    var link_to_edit_user_{{ pk }} = "{% url 'dmt:user-add' pk %}";
+    var link_to_remove_user_{{ pk }} = "{% url 'dmt:user-remove' pk %}";
+    var link_to_load_user_list_{{ pk }} = "{% url 'dmt:user-list' pk %}";
+
+    var link_to_load_ip_remove = "{% url 'dmt:ip-remove' %}";
+    var link_to_status_change_user = "{% url 'dmt:user-status-change' %}";
+
+
+        function ip_add(ip) {
+            $.getJSON('{% url 'dmt:ip-add' pk %}', {'ip': ip}, function (data) {
+               $('#addr').val('');
+               if(data.error) {
+                    $('#error').text(data.message).show();
+                    return;
+                }
+
+                load_ip_list();
+                load_ip_active_list();
+                load_ip_released_list();
+            });
+        }
+
+        function ip_exclude(ip) {
+            $.getJSON('{% url 'dmt:ip-exclude' pk %}', {'ip': ip}, function (data) {
+               if(data.error) {
+                    $('#error').text(data.message).show();
+                    return;
+                }
+
+                load_ip_list();
+                load_ip_active_list();
+                load_ip_released_list();
+            });
+        }
+
+        function ip_remove(ip) {
+            $.getJSON('{% url 'dmt:ip-remove' pk %}', {'ip': ip}, function (data) {
+               if(data.error) {
+                    $('#error').text(data.message).show();
+                    return;
+                }
+
+                load_ip_list();
+                load_ip_active_list();
+                load_ip_released_list();
+            });
+        }
+
+        function ip_select(ip) {
+            $("#addr").val(ip);
+
+        }
+
+        function user_add(pk) {
+            $.getJSON('{% url 'dmt:user-add' pk %}', {'pk': pk}, function (data) {
+               $('#email').val('');
+               if(data.error) {
+                    $('#error').text(data.message).show();
+                    return;
+                }
+
+                load_user_list();
+            });
+        }
+
+        function user_status_change(pk) {
+            $.getJSON('{% url 'dmt:user-status-change' %}', {'pk': pk}, function (data) {
+               if(data.error) {
+                    $('#error').text(data.message).show();
+                    return;
+                }
+
+                load_user_list();
+            });
+        }
+
+        function user_remove(pk) {
+            $.getJSON('{% url 'dmt:user-remove' pk %}', {'pk': pk}, function (data) {
+               if(data.error) {
+                    $('#error').text(data.message).show();
+                    return;
+                }
+
+                load_user_list();
+            });
+        }
+
+        function load_user_list() {
+            $("#user_list > tbody").load('{% url 'dmt:user-list' pk %}');
+            $('#error').hide();
+        }
+
+        function load_ip_list() {
+            $("#ip_list > tbody").load('{% url 'dmt:ip-list' pk %}');
+            $('#error').hide();
+        }
+
+        function load_ip_active_list() {
+            $("#ip_active_list > tbody").load('{% url 'dmt:ip-active-list' pk %}');
+            $('#error').hide();
+        }
+
+        function load_ip_released_list() {
+            $("#ip_released_list > tbody").load('{% url 'dmt:ip-released-list' pk %}');
+            $('#error').hide();
+        }
+
+        $(document).ready(function(){
+            load_user_list();
+            load_ip_list();
+            load_ip_active_list();
+            load_ip_released_list();
+
+            $('#email').attr('pk', 0);
+            $("#email").autocomplete({
+                source: function(request, response){
+                    $.getJSON('{% url 'dmt:sug-user' pk %}', {'email':$('#email').val()}, function(data){
+                        response($.map(data, function (item){
+                            return {
+                                pk: item.pk,
+                                label: item.email
+                            }
+                        }));
+                    });
+                },
+                minLength: 1,
+                select: function(event, ui){
+                    $('#email').attr('pk', ui.item.pk);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<h1>Route Edit</h1>
+<input type="button" value="Back" style="display:inline;" onClick="history.back();">
+<form action="" style="display:inline;" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save">
+    <input type="submit" value="Cancel" style="display:inline;" onClick="history.back();">
+</form>
+{% if remove %}
+    <form action="{% url 'dmt:route-remove' pk %}" style="display:inline;" method="post">{% csrf_token %}
+        <input type="submit" style="display:inline;" value="Delete">
+    </form>
+{% endif %}
+
+    <br><br>
+    <div id="error" style="color:red;"></div>    
+    <p>
+        <label for="addr">Addr:</label>
+        <input id="addr" type="text" name="addr">
+    </p>
+    <a href="javascript:void(0);" style="color:Red;" onClick="ip_add($('#addr').val());">Add ip address</a>
+    <p>
+        <label for="email">Email:</label>
+        <input id="email" type="text" name="email">
+    </p>
+    <a href="javascript:void(0);" id="addEmail" style="color:Red;" onClick="user_add($('#email').attr('pk'));">Add user email</a>
+
+    <br><br><br>
+
+    <table id="lists">
+        <tbody>
+            <tr>
+                <td>
+                    <table id="ip_list" border="1" style="display:inline;align:left;">
+                        <caption>IP List</caption>
+                        <thead>
+                            <tr>
+                                <td>IP Addr</td>
+                                <td>Exclude</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Insert -->
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <table id="user_list" border="1" style="display:inline;align:left;">
+                        <caption>User List</caption>
+                        <thead>
+                            <tr>
+                                <td>Users</td>
+                                <td>ApiKeys</td>
+                                {% if remove %}
+                                    <td>Remove</td>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Insert -->
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <table id="ip_active_list" border="1" style="display:inline;align:left;">
+                        <caption>IP Addrs active List</caption>
+                        <thead>
+                            <tr>
+                                <td>IP Addr</td>
+                                <td>Route name</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Insert -->
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <table id="ip_released_list" border="1" style="display:inline;align:left;">
+                        <caption>IP Addrs released List</caption>
+                        <thead>
+                            <tr>
+                                <td>IP Addr</td>
+                                <td>Remove</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Insert -->
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br><br>
+</body>
+</html>

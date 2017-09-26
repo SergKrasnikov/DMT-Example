@@ -1,0 +1,89 @@
+<style>
+table.add_tbl_ip {
+    width:250px;
+}
+table.add_tbl tbody tr:nth-child(2n+1) {
+    background:#fff none repeat scroll 0 0;
+}
+table.add_tbl td {
+    padding-left:10px;
+}
+</style>
+<div class="form_row" id="div_ip">
+    <div id="ip_list" class="scroll_block" style="float:left;overflow:hidden;font-size:12px;margin-bottom:10px;height:81px;width:300px;margin-left:10px;margin-right:20px;">
+        <table class="add_tbl_ip add_tbl" id="ip_list_table">
+            <thead>
+                <tr>
+                    <th>{{ route_name }} IPs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ip in ip_list %}
+                    <tr><td>
+                        {{ ip.addr }}
+                    </td>
+                    <td class="td_delete_link">
+                        <a class="delete_link delete_ips_link"
+                           href="javascript:void(0)"
+                           onClick="javascript:ip_exclude('{{ ip.addr }}')"
+                           style="display:none;"></a>
+                    </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+table.add_tbl_user  {
+    width:250px;
+}
+table.add_tbl_user td {
+    height:40px;
+    line-height:40px;
+    padding-left:10px;
+}
+table.add_tbl_user thead th {
+    border-bottom: 1px solid #f1f1f1;
+    color: #808080;
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    height: 25px;
+    line-height: 40px;
+    padding: 0 16px;
+    text-align: left;
+}
+table.add_tbl_user tbody tr:nth-child(2n+1) {
+    background: #fff none repeat scroll 0 0;
+}
+</style>
+<div class="form_row" id="div_user">
+    <div id="user_list" class="scroll_block" style="overflow-x:hidden;overflow-y:hidden;font-size:12px;margin-bottom:10px;width:300px;margin-top:10px;">
+        <table class="add_tbl_user" id="user_list_table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    {% if remove %}
+                        <th></th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in user_list %}
+                <tr><td>
+                    <a href="javascript:void(0);" style="color:{% if user.is_active %}Green{% else %}Gray{% endif %};" onClick="javascript:user_status_change('{{ user.pk }}');">{{ user.email }}</a>
+                </td>
+                {% if remove %}
+                    <td class="td_delete_link">
+                        <a class="delete_link delete_user_link"
+                           href="javascript:void(0)"
+                           onClick="javascript:user_remove('{{ user.pk }}')"
+                           style="display:none;"></a>
+                    </td>
+                {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

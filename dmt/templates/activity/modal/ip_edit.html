@@ -1,0 +1,238 @@
+<form id="ips_form">
+<style>
+form#ips_form div.form_row {
+    margin-bottom:13px;
+}
+</style>
+    <div class="form_row">
+        <label for="new_ip">Add new IP</label>
+        <div class="field_wrap">
+            <input type="text" name="ip_addr" id="ip_addr" class="ip_inp" value="" />
+            <button type="button" class="btn_big btn_blue" onClick="ip_ip_add($('#ip_addr').val());">Add</button>
+        </div>
+        <p id="err_text"></p>
+    </div>
+</form>
+<div id="ip_refresh_window">
+    <!-- Include -->
+</div>
+<script>
+
+
+if(typeof jQuery=='undefined') {
+    var headTag = document.getElementsByTagName("head")[0];
+    var jqTag = document.createElement('script');
+    jqTag.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js';
+    jqTag.onload = ip_lists_refresh();
+    headTag.appendChild(jqTag);
+} else {
+    ip_lists_refresh();
+}
+
+function ip_lists_refresh() {
+    $("#ip_refresh_window").load('{% url 'dmt:ip-list' pk %}', function(responseText, textStatus, XMLHttpRequest) {
+        recalcHeight();
+    });
+    $('#error').hide();
+}
+function recalcHeight() {
+    var heights = [$('#ip_list').height()+10, $('#ip_active_list').height()+10, $('#ip_released_list').height()+10];
+    var height_refresh = Math.max.apply(null, heights);
+
+    var height_head=$('#edit_ip_window > .modal_window_top').height() + $('#edit_ip_window > .modal_body').height() - $('#refresh_window').height();
+
+    height_window = $(window).height();
+    height_modal_window = height_window / 100 * 80;
+
+    if (height_modal_window < 762) { height_modal_window = 762 }
+
+    if ((height_refresh + height_head) < 762) { height_modal_window = height_refresh + height_head }
+
+    var top=($(window).height() - (height_modal_window))/2;
+
+    $('#edit_ip_window').css('height', height_modal_window).css('top', top+'px');
+
+    if (height_refresh + height_head + 10 > height_modal_window) {
+
+        if ($('#ip_list_table').height() > height_modal_window - height_head) {
+            $('#ip_list').css('height', (height_modal_window - height_head)+'px').css('overflow-y', 'scroll').css('overflow-x', 'hidden');
+        } else {
+            $('#ip_list').css('height', $('#ip_list_table').height()).css('overflow-y', 'hidden').css('overflow-x', 'hidden');
+        }
+
+        if ($('#ip_active_list_table').height() > height_modal_window - height_head) {
+            $('#ip_active_list').css('height', (height_modal_window - height_head)+'px').css('overflow-y', 'scroll').css('overflow-x', 'hidden');
+        } else {
+            $('#ip_active_list').css('height', $('#ip_active_list_table').height()).css('overflow-y', 'hidden').css('overflow-x', 'hidden');
+        }
+
+        if ($('#ip_released_list_table').height() > height_modal_window - height_head) {
+            $('#ip_released_list').css('height', (height_modal_window - height_head)+'px').css('overflow-y', 'scroll').css('overflow-x', 'hidden');
+        } else {
+            $('#ip_released_list').css('height', $('#ip_released_list_table').height()).css('overflow-y', 'hidden').css('overflow-x', 'hidden');
+        }
+    }
+}
+
+function func_ip_ip_first_add(addr) {
+    $.getJSON('{% url 'dmt:ip-add' pk %}', {'addr': addr, 'confirm': false}, function(data) {
+        closeMyConfirmIpFirstAdd();
+        $('#addr').val('');
+        if(data.error) {
+            $('#ip_err_text').text(data.message).show();
+        }
+        var tag_p = '';
+        $.each(data.ip_in_route, function(key, value) {
+            tag_p += '<p>route_id: '+key+' -> Ip addr: '+value.addr+' # route name: '+value.route+'</p>'
+        });
+        if(tag_p != '') {
+            myConfirm(text='<p>Вы уверены, что хотите добавить IP: '+tag_p+' ?</p>',
+                    func="javascript:second_func_ip_add('"+addr+"');",
+                    btn_text='Да',
+                    title='Подтверждение добавления IP адреса');
+        }
+        ip_lists_refresh();
+    });
+}
+function second_func_ip_add(addr) {
+    $.getJSON('{% url 'dmt:ip-add' pk %}', {'addr': addr, 'confirm': true}, function(data) {
+        $('#addr').val('');
+        if(data.error) {
+            $('#ip_err_text').text(data.message).show();
+        }
+        lists_refresh();
+        closeMyConfirm();
+    });
+}
+function ip_ip_add(addr) {
+    $('#ip_err_text').hide();
+    myConfirmIpFirstAdd(addr=addr);
+}
+function func_ip_ip_exclude(ip) {
+    $.getJSON('{% url 'dmt:ip-exclude' pk %}', {'ip': ip}, function(data) {
+        $('#addr').val('');
+        if(data.error) {
+            $('#ip_err_text').text(data.message).show();
+        }
+        ip_lists_refresh();
+        closeMyConfirmIpExclude();
+    });
+}
+function ip_ip_exclude(ip) {
+    $('#ip_err_text').hide();
+    myConfirmIpExclude(addr=ip);
+}
+function ip_ip_select(ip) {
+    $("#ip_addr").val(ip);
+    $('#ip_err_text').hide();
+}
+function ip_ip_remove(ip) {
+    $('#ip_err_text').hide();
+    $.getJSON('{% url 'dmt:ip-remove' %}', {'ip':ip}, function(data) {
+       if(data.error) {
+            $('#ip_err_text').text(data.message).show();
+        }
+        ip_lists_refresh();
+    });
+}
+
+function myConfirmIpExclude(addr) {
+    var html = '<div class="modal_window middle_modal_window" id="confirm_modal_ip_exclude">' +
+                   '<div class="modal_window_top err">' +
+                       '<div class="modal_window_title">Подтверждение удаления IP адреса</div>' +
+                       '<div class="modal_window_close" >' +
+                           '<a href="javascript:void(0)" class="close_icon" onClick="closeMyConfirmIpExclude()"></a>' +
+                       '</div>' +
+                       '<div class="clr"></div>' +
+                   '</div>'+
+                   '<div class="modal_content_wrapper">' +
+                       '<div class="text" id="modal_text">Вы уверены, что хотите удалить IP: '+addr+'</div>' +
+                       '<div class="modal_window_bottom form_buttons">' +
+                           '<button type="button" class="btn_big btn_blue" onClick="javascript:func_ip_ip_exclude(\''+addr+'\');">Да</button>' +
+                           '<button type="button" class="btn_big btn_trans_red" onClick="closeMyConfirmIpExclude()">Cancel</button>' +
+                       '</div>' +
+                   '</div>' +
+               '</div>';
+    $("body").append(html);
+    $("#confirm_shadow").height($(document).height()).css({'opacity':'0', 'display':'block'});
+    $("#confirm_shadow").animate({'opacity':'0.65'}, 500);
+    var top = ($(window).height()-$("#confirm_modal_ip_exclude").height())/2;
+    if(top<0){top=50;}
+    $("#confirm_modal_ip_exclude").css('left','50%').animate({top:top+'px'}, 500, "easeOutBack");
+    $("#confirm_modal_ip_exclude").draggable({
+        handle:"div.modal_window_title"
+    });
+}
+function closeMyConfirmIpExclude(){
+    $("#confirm_modal_ip_exclude").animate({top:'-150%'}, 500, "easeInBack");
+    $("#confirm_shadow").animate({opacity:'0'}, 500);
+    setTimeout('$("#confirm_shadow").css("display", "none");$("#confirm_modal_ip_exclude").remove();', 500);
+}
+
+function myConfirmIpFirstAdd(addr) {
+    var html = '<div class="modal_window middle_modal_window" id="confirm_modal_ip_first_add">' +
+                   '<div class="modal_window_top err">' +
+                       '<div class="modal_window_title">Подтверждение добавлнения IP адреса</div>' +
+                       '<div class="modal_window_close" >' +
+                           '<a href="javascript:void(0)" class="close_icon" onClick="closeMyConfirmIpFirstAdd()"></a>' +
+                       '</div>' +
+                       '<div class="clr"></div>' +
+                   '</div>'+
+                   '<div class="modal_content_wrapper">' +
+                       '<div class="text" id="modal_text">Вы уверены, что хотите добавить IP: '+addr+'</div>' +
+                       '<div class="modal_window_bottom form_buttons">' +
+                           '<button type="button" class="btn_big btn_blue" onClick="javascript:func_ip_ip_first_add(\''+addr+'\');">Да</button>' +
+                           '<button type="button" class="btn_big btn_trans_red" onClick="closeMyConfirmIpFirstAdd()">Cancel</button>' +
+                       '</div>' +
+                   '</div>' +
+               '</div>';
+    $("body").append(html);
+    $("#confirm_shadow").height($(document).height()).css({'opacity':'0', 'display':'block'});
+    $("#confirm_shadow").animate({'opacity':'0.65'}, 500);
+    var top = ($(window).height()-$("#confirm_modal_ip_first_add").height())/2;
+    if(top<0){top=50;}
+    $("#confirm_modal_ip_first_add").css('left','50%').animate({top:top+'px'}, 500, "easeOutBack");
+    $("#confirm_modal_ip_first_add").draggable({
+        handle:"div.modal_window_title"
+    });
+}
+function closeMyConfirmIpFirstAdd(){
+    $("#confirm_modal_ip_first_add").animate({top:'-150%'}, 500, "easeInBack");
+    $("#confirm_shadow").animate({opacity:'0'}, 500);
+    setTimeout('$("#confirm_shadow").css("display", "none");$("#confirm_modal_ip_first_add").remove();', 500);
+}
+
+function myConfirmIpSecondAdd(addr) {
+    var html = '<div class="modal_window middle_modal_window" id="confirm_modal_ip_second_add">' +
+                   '<div class="modal_window_top err">' +
+                       '<div class="modal_window_title">Подтверждение добавлнения IP адреса</div>' +
+                       '<div class="modal_window_close" >' +
+                           '<a href="javascript:void(0)" class="close_icon" onClick="closeMyConfirmIpSecondAdd()"></a>' +
+                       '</div>' +
+                       '<div class="clr"></div>' +
+                   '</div>'+
+                   '<div class="modal_content_wrapper">' +
+                       '<div class="text" id="modal_text">Вы уверены, что хотите добавить IP: '+addr+'</div>' +
+                       '<div class="modal_window_bottom form_buttons">' +
+                           '<button type="button" class="btn_big btn_blue" onClick="javascript:func_ip_ip_second_add(\''+addr+'\');">Да</button>' +
+                           '<button type="button" class="btn_big btn_trans_red" onClick="closeMyConfirmIpSecondAdd()">Cancel</button>' +
+                       '</div>' +
+                   '</div>' +
+               '</div>';
+    $("body").append(html);
+    $("#confirm_shadow").height($(document).height()).css({'opacity':'0', 'display':'block'});
+    $("#confirm_shadow").animate({'opacity':'0.65'}, 500);
+    var top = ($(window).height()-$("#confirm_modal_ip_second_add").height())/2;
+    if(top<0){top=50;}
+    $("#confirm_modal_ip_second_add").css('left','50%').animate({top:top+'px'}, 500, "easeOutBack");
+    $("#confirm_modal_ip_second_add").draggable({
+        handle:"div.modal_window_title"
+    });
+}
+function closeMyConfirmIpSecondAdd(){
+    $("#confirm_modal_ip_second_add").animate({top:'-150%'}, 500, "easeInBack");
+    $("#confirm_shadow").animate({opacity:'0'}, 500);
+    setTimeout('$("#confirm_shadow").css("display", "none");$("#confirm_modal_ip_second_add").remove();', 500);
+}
+
+</script>

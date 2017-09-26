@@ -1,0 +1,5 @@
+{% for route in items %}{% for ip in route.ip_list.all %}{% if ip.reverse %}<virtual-mta {{ ip.addr }}-{{ route.pk }}> #  {{ route.name }}
+    smtp-source-host {{ ip.addr}} {{ ip.reverse }}
+    include /etc/pmta/domain.prefs/pool-{{ route.id }}.conf #  {{ route.name }}
+</virtual-mta>
+{% endif %}{% endfor %}{% endfor %}

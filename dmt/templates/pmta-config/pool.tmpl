@@ -1,0 +1,4 @@
+{% for route in items %}<virtual-mta-pool pool-{{ route.pk }}> #  {{ route.name }}
+{% for ip in route.ip_list.all %}{% if ip.reverse %}    virtual-mta {{ ip.addr }}-{{ route.pk }}
+{% endif %}{% endfor %}</virtual-mta-pool>
+{% endfor %}

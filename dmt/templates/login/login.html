@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login to DMT Management console</title>
+
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+	<link rel="stylesheet" href="http://dev.dcapi.net/media/dmt/login/css/as_grid.css">
+	<link rel="stylesheet" href="http://dev.dcapi.net/media/dmt/login/css/style.css">
+
+</head>
+<body class="flex_center_column_wh">
+	<header class="login_header">
+		<a href="#" class="logo block fleft transition">
+			<span class="logo_deliverability">DELIVERABILITY</span><br>
+			MANAGMENT <span class="logo_tool">TOOL</span>
+		</a>
+	</header>
+	<div class="login_wrapper flex_center_column_wh">
+		<img src="http://dev.dcapi.net/media/dmt/login/images/login_hero.png" alt="hero" class="login_hero">
+		<form action="{% url 'dmt:login' %}" class="login_form flex_center_column_w one_col" method="POST">{% csrf_token %}
+			<div>
+				<span class="login_form_title">Apikey:</span><br>
+				<input type="text" class="login_form_input_text" id="id_apikey" name="apikey"><br>
+                {% if form.non_field_errors or form.apikey.errors %}
+                    <div class="login_error">
+                        {{ form.non_field_errors.as_text }}<br>
+                        {{ form.apikey.errors.as_text }}
+                    </div>
+                {% else %}
+    				<span class="login_form_subtitle">Enter you apikey as username</span><br>
+                {% endif %}
+			</div>
+			<input type="submit" class="login_form_input_submit transition" value="LOGIN">
+		</form>
+	</div>
+</body>
+</html>

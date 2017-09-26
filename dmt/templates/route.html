@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Route manage</title>
+</head>
+<body>
+<h1>Route Manage</h1>
+{# <a href="{1% url 'dmt:route-create' %}" style="display:inline;">Create new Route</a><br> #}
+<a href="{% url 'dmt:route-activity' %}" style="display:inline;">Return to filter Route</a>
+<table border="1">
+    <thead>
+        <tr>
+            <th>pool</th>
+            <th>name</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for route in routes %}
+        <tr>
+            <td>{{ route.pk }}</td>
+            <td><a href="{% url 'dmt:route-edit' route.pk %}">{{ route.name }}</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

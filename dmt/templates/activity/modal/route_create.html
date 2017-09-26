@@ -1,0 +1,18 @@
+<form id="create_route_form" onsubmit="return createRoute()">{% csrf_token %}
+    <div class="form_row">
+        <label for="id_name">Route name: </label>
+        <div class="field_wrap">
+            {{ form.name }}
+        </div>
+        <p class="err_text"></p>
+        <label for="id_mta">Mta: </label>
+        <div class="field_wrap">
+            {{ form.mta }}
+        </div>
+        <p class="err_text"></p>
+    </div>
+    <div class="form_buttons">
+        <button type="submit" class="btn_big btn_blue">Create</button>
+        <button type="button" class="btn_big btn_trans_red" onclick="closeModal()">Cancel</button>
+    </div>
+</form>

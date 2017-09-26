@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>DMT</title>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,600,300&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+	<link href="css/lc_switch.css" rel="stylesheet" />
+	<link href="css/jquery-ui.css" rel="stylesheet" />
+	<link href="css/jquery-ui.theme.min.css" rel="stylesheet" />
+	<link href="css/modal.css" rel="stylesheet" />
+	<link href="css/jquery.jscrollpane.css" rel="stylesheet" />
+	<link href="css/style.css" rel="stylesheet" />
+	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery-ui.min.js"></script>
+	<script src="js/lc_switch.min.js"></script>
+	<script src="js/jquery.caret.js"></script>
+	<script src="js/jquery.ipaddress.js"></script>
+	<script src="js/jquery.jscrollpane.min.js"></script>
+	<script src="js/modal.js"></script>
+	<script>
+	//GLOBAL JS VARIABLES
+	var SENT_MIN = 0;
+	var SENT_MAX = 500;
+	var DELIVERED_MIN = 0;
+	var DELIVERED_MAX = 100;
+	var OPENED_MIN = 0;
+	var OPENED_MAX = 100;
+	var CLICKED_MIN = 0;
+	var CLICKED_MAX = 100;
+	var NOSPF_MIN = 0;
+	var NOSPF_MAX = 100;
+	var SBOUNCE_MIN = 0;
+	var SBOUNCE_MAX = 100;
+	var HBOUNCE_MIN = 0;
+	var HBOUNCE_MAX = 100;
+	var YAHOO_MIN = 0;
+	var YAHOO_MAX = 100;
+	var HOTMAIL_MIN = 0;
+	var HOTMAIL_MAX = 100;
+	var AOL_MIN = 0;
+	var AOL_MAX = 100;
+	var COMCAST_MIN = 0;
+	var COMCAST_MAX = 100;
+	var OTHER_MIN = 0;
+	var OTHER_MAX = 100;
+	</script>
+	<script src="js/onload.js"></script>
+</head>
+<body>
+
+<header id="header">
+	<div id="logo">
+		<a href="/">
+			<b>Deliverability</b>
+			managment <span>tool</span>
+		</a>
+	</div>
+	<nav id="main_menu">
+		<ul>
+			<li><a href="#" class="active">Dashboard</a></li>
+			<li><a href="#">Pool Activity</a></li>
+			<li><a href="#">Queue</a></li>
+			<li><a href="#">IP Management</a></li>
+			<li><a href="#">Abuse</a></li>
+			<li><a href="#">Throttles Tab</a></li>
+			<li><a href="#">Pool Management</a></li>
+		</ul>
+	</nav>
+	<div id="profile_top">
+		<a href="#">Ivan Dyrkoff</a>
+	</div>
+	<div class="clr"></div>
+</header>
+
+<main>
+	<div class="main">
+		<div id="search_block">
+			<form id="search_form" onsubmit="prepareSearch()">
+				<div id="search_wrap">
+					<input type="text" name="s" id="search" />
+					<button type="submit" id="search_sbmt">Search</button>
+				</div>
+			</form>
+		</div>
+		
+		<div id="filter_block" class="white_block">
+			<form id="filter_form">
+			<div class="title_block">
+				<div class="title_left title_toggle">
+					Filter <span class="down"></span>
+				</div>
+				<div class="title_right">
+					<div class="switcher">
+						<input type="checkbox" name="filter" value="1" class="lcs_check" autocomplete="off" />
+					</div>
+				</div>
+				<div class="clr"></div>
+			</div>
+			<div class="block_content">
+				<div class="range_block">
+					<div class="range_item_block">
+						<div class="range_title">Date</div>
+						<div class="range_values">&nbsp;</div>
+						<div class="clr"></div>
+						<div class="range_wrapper" style="padding-left:0">
+							<input type="text" class="date_inp" value="" name="from" id="date_from" /><span class="date_sep">-</span>
+							<input type="text" class="date_inp" value="" name="to" id="date_to" />
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title">Sent</div>
+						<div class="range_values">
+							<span id="sent_slider_values">1 420 - 23 450</span>
+							<input type="hidden" name="sent_min" id="sent_min" value="" />
+							<input type="hidden" name="sent_max" id="sent_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="sent_slider"></div>
+						</div>
+					</div>
+
+					<div class="range_item_block">
+						<div class="range_title">Delivered</div>
+						<div class="range_values">
+							<span id="delivered_slider_values">5% - 33%</span>
+							<input type="hidden" name="delivered_min" id="delivered_min" value="" />
+							<input type="hidden" name="delivered_max" id="delivered_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="delivered_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title">Opened</div>
+						<div class="range_values">
+							<span id="opened_slider_values">5% - 33%</span>
+							<input type="hidden" name="opened_min" id="opened_min" value="" />
+							<input type="hidden" name="opened_max" id="opened_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="opened_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title">Clicked</div>
+						<div class="range_values">
+							<span id="clicked_slider_values">5% - 33%</span>
+							<input type="hidden" name="clicked_min" id="clicked_min" value="" />
+							<input type="hidden" name="clicked_max" id="clicked_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="clicked_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title">No SPF</div>
+						<div class="range_values">
+							<span id="nospf_slider_values">5% - 33%</span>
+							<input type="hidden" name="nospf_min" id="nospf_min" value="" />
+							<input type="hidden" name="nospf_max" id="nospf_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="nospf_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title">Soft Bounce</div>
+						<div class="range_values">
+							<span id="sbounce_slider_values">5% - 33%</span>
+							<input type="hidden" name="sbounce_min" id="sbounce_min" value="" />
+							<input type="hidden" name="sbounce_max" id="sbounce_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="sbounce_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title">Hard Bounce</div>
+						<div class="range_values">
+							<span id="hbounce_slider_values">5% - 33%</span>
+							<input type="hidden" name="hbounce_min" id="hbounce_min" value="" />
+							<input type="hidden" name="hbounce_max" id="hbounce_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="hbounce_slider"></div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="range_block">
+					<div class="range_item_block">
+						<div class="range_title" style="color:#4101af">Yahoo Score</div>
+						<div class="range_values">
+							<span id="yahoo_slider_values">5% - 33%</span>
+							<input type="hidden" name="yahoo_min" id="yahoo_min" value="" />
+							<input type="hidden" name="yahoo_max" id="yahoo_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="yahoo_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title" style="color:#f57f20">HotMail Score</div>
+						<div class="range_values">
+							<span id="hotmail_slider_values">5% - 33%</span>
+							<input type="hidden" name="hotmail_min" id="hotmail_min" value="" />
+							<input type="hidden" name="hotmail_max" id="hotmail_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="hotmail_slider"></div>
+						</div>
+					</div>
+				
+					<div class="range_item_block">
+						<div class="range_title" style="color:#005ba4">AOL Score</div>
+						<div class="range_values">
+							<span id="aol_slider_values">5% - 33%</span>
+							<input type="hidden" name="aol_min" id="aol_min" value="" />
+							<input type="hidden" name="aol_max" id="aol_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="aol_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title" style="color:#dc2d3a">Comcast Score</div>
+						<div class="range_values">
+							<span id="comcast_slider_values">5% - 33%</span>
+							<input type="hidden" name="comcast_min" id="comcast_min" value="" />
+							<input type="hidden" name="comcast_max" id="comcast_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="comcast_slider"></div>
+						</div>
+					</div>
+					
+					<div class="range_item_block">
+						<div class="range_title" style="color:#2a3d4d">Others Score</div>
+						<div class="range_values">
+							<span id="others_slider_values">5% - 33%</span>
+							<input type="hidden" name="others_min" id="others_min" value="" />
+							<input type="hidden" name="others_max" id="others_max" value="" />
+						</div>
+						<div class="clr"></div>
+						<div class="range_wrapper">
+							<div id="others_slider"></div>
+						</div>
+					</div>
+					<div class="range_item_block" style="text-align:right;margin-top:20px;">
+						<button type="button" class="btn_small btn_blue">Filter</button>
+					</div>
+				</div>
+				
+				<div class="clr"></div>
+			</div>
+			</form>
+		</div>
+		
+		<div class="separator"></div>
+		
+		<div id="content_block" class="white_block">
+			<div class="title_block">
+				<div class="title_left">
+					Pool Management
+				</div>
+				<div class="title_right">
+					<a href="javascript:void(0)" onclick="openCreateNewPool()" class="btn_small btn_blue">Create new</a>
+				</div>
+				<div class="clr"></div>
+			</div>
+			<div class="block_content">
+				<table class="pool_tbl">
+					<thead>
+						<tr>
+							<th>Pool Name</th>
+							<th>IP`s</th>
+							<th>Created Date</th>
+							<th>Updated Date</th>
+							<th>Senders</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><a href="javascript:void(0)" onclick="openRenamePool($(this))" data-name="Celtics" data-id="1">Celtics</a></td>
+							<td><a href="javascript:void(0)" onclick="openIPsPool($(this))" data-id="1">421</a></td>
+							<td>11.12.2016</td>
+							<td>11.12.2016</td>
+							<td><a href="javascript:void(0)" onclick="openUsersPool($(this))" data-id="1">sloopka@gmail.com and 10</a></td>
+						</tr>
+						<tr>
+							<td><a href="javascript:void(0)" onclick="openRenamePool($(this))" data-name="Lakers" data-id="2">Lakers</a></td>
+							<td><a href="javascript:void(0)" onclick="openIPsPool($(this))" data-id="2">24 011</a></td>
+							<td>29.09.2015</td>
+							<td>03.11.2016</td>
+							<td><a href="javascript:void(0)" onclick="openUsersPool($(this))" data-id="2">somamail@gmail.com</a></td>
+						</tr>
+						<tr>
+							<td><a href="javascript:void(0)" onclick="openRenamePool($(this))" data-name="Celtics" data-id="1">Celtics</a></td>
+							<td><a href="javascript:void(0)" onclick="openIPsPool($(this))" data-id="1">421</a></td>
+							<td>11.12.2016</td>
+							<td>11.12.2016</td>
+							<td><a href="javascript:void(0)" onclick="openUsersPool($(this))" data-id="1">sloopka@gmail.com and 10</a></td>
+						</tr>
+						<tr>
+							<td><a href="javascript:void(0)" onclick="openRenamePool($(this))" data-name="Lakers" data-id="2">Lakers</a></td>
+							<td><a href="javascript:void(0)" onclick="openIPsPool($(this))" data-id="2">24 011</a></td>
+							<td>29.09.2015</td>
+							<td>03.11.2016</td>
+							<td><a href="javascript:void(0)" onclick="openUsersPool($(this))" data-id="2">somamail@gmail.com</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</main>
+
+<footer id="footer">
+
+</footer>
+
+<!--===MODALS===-->
+
+
+<!--POOL RENAME-->
+<div class="modal_window middle_modal_window" id="rename_pool_window">
+    <div class="modal_window_top">
+        <div class="modal_window_title">Pool Name</div>
+        <div class="modal_window_close">
+            <a href="javascript:void(0)" class="close_icon modal_close_link"></a>
+        </div>
+        <div class="clr"></div>
+    </div>
+    <div class="modal_content_wrapper modal_body">
+		<form id="rename_pool_form" onsubmit="return renamePool()">
+			<input type="hidden" name="id" id="pool_rename_id" value="" />
+			<div class="form_row">
+				<label for="pool_rename">Pool name</label>
+				<div class="field_wrap">
+					<input type="text" name="name" id="pool_rename" value="" />
+				</div>
+				<p class="err_text"></p>
+			</div>
+			<div class="form_buttons">
+				<button type="submit" class="btn_big btn_blue">Save</button>
+				<button type="button" class="btn_big btn_trans_red" onclick="closeModal()">Cancel</button>
+			</div>
+		</form>
+    </div>
+</div>
+
+<!--POOL CREATE-->
+<div class="modal_window middle_modal_window" id="create_pool_window">
+    <div class="modal_window_top">
+        <div class="modal_window_title">Create New Pool</div>
+        <div class="modal_window_close">
+            <a href="javascript:void(0)" class="close_icon modal_close_link"></a>
+        </div>
+        <div class="clr"></div>
+    </div>
+    <div class="modal_content_wrapper modal_body">
+		<form id="create_pool_form">
+			<input type="hidden" name="id" id="pool_id" value="" />
+			<div class="form_row">
+				<label for="pool_rename">Pool name</label>
+				<div class="field_wrap">
+					<input type="text" name="name" id="pool_name" value="" />
+				</div>
+				<p class="err_text"></p>
+			</div>
+			<div class="form_row half_row fleft">
+				<label for="pool_ip">Add new IP</label>
+				<div class="field_wrap">
+					<input type="text" name="pool[ip]" id="pool_ip" value="" class="ip_inp" />
+					<button type="button" class="btn_big btn_blue" onclick="addPoolIP()">Add</button>
+				</div>
+				<p class="err_text"></p>
+			</div>
+			<div class="form_row half_row fright">
+				<label for="pool_user">Add new user</label>
+				<div class="field_wrap">
+					<input type="text" name="user" id="pool_user" value="" />
+					<button type="button" class="btn_big btn_blue" onclick="addPoolUser()">Add</button>
+				</div>
+				<p class="err_text"></p>
+			</div>
+			<div class="clr"></div>
+			
+			<div class="form_row half_row fleft">
+				<table class="add_tbl">
+					<thead>
+						<tr>
+							<th>IP</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody id="pool_ip_tbody">
+					</tbody>
+				</table>
+			</div>
+			<div class="form_row half_row fright">
+				<table class="add_tbl">
+					<thead>
+						<tr>
+							<th>User</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody id="pool_user_tbody">
+					</tbody>
+				</table>
+			</div>
+			<div class="clr"></div>
+			
+			<div class="form_buttons">
+				<button type="button" class="btn_big btn_blue" onclick="createNewPool()">Create</button>
+				<button type="button" class="btn_big btn_trans_red" onclick="closeModal()">Cancel</button>
+			</div>
+		</form>
+    </div>
+</div>
+
+<div class="modal_window middle_modal_window" id="ips_window">
+    <div class="modal_window_top">
+        <div class="modal_window_title">IP`s</div>
+        <div class="modal_window_close">
+            <a href="javascript:void(0)" class="close_icon modal_close_link"></a>
+        </div>
+        <div class="clr"></div>
+    </div>
+    <div class="modal_content_wrapper modal_body">
+		<form id="ips_form">
+			<div class="form_row">
+				<label for="new_ip">Add new IP</label>
+				<div class="field_wrap">
+					<input type="text" name="ip" id="new_ip" class="ip_inp" value="" />
+					<button type="button" class="btn_big btn_blue" onclick="addNewIP()">Add</button>
+				</div>
+				<p class="err_text"></p>
+			</div>
+			
+			<div class="form_row">
+				<div class="scroll_block">
+					<table class="add_tbl">
+						<thead>
+							<tr>
+								<th>IP</th>
+								<th>Date</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody id="new_ips_tbody">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="modal_window middle_modal_window" id="users_window">
+    <div class="modal_window_top">
+        <div class="modal_window_title">Senders</div>
+        <div class="modal_window_close">
+            <a href="javascript:void(0)" class="close_icon modal_close_link"></a>
+        </div>
+        <div class="clr"></div>
+    </div>
+    <div class="modal_content_wrapper modal_body">
+		<form id="ips_form" onsubmit="return false;">
+			<div class="form_row">
+				<label for="new_ip">Add new user</label>
+				<div class="field_wrap">
+					<input type="text" name="name" id="new_user" value="" />
+					<button type="button" class="btn_big btn_blue" onclick="addNewUser()">Add</button>
+				</div>
+				<p class="err_text"></p>
+			</div>
+			
+			<div class="form_row">
+				<div class="scroll_block">
+					<table class="add_tbl">
+						<thead>
+							<tr>
+								<th>User</th>
+								<th>Added Date</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody id="new_users_tbody">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+
+<div id="shadow"></div>
+<div id="alert_shadow"></div>
+<div id="confirm_shadow"></div>
+</body>

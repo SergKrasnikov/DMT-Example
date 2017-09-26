@@ -1,0 +1,366 @@
+{% load sorting_tags %}
+<!DOCTYPE html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>DMT</title>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,600,300&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+	<link href="http://dev.dcapi.net/media/dmt/activity/css/lc_switch.css" rel="stylesheet" />
+	<link href="http://dev.dcapi.net/media/dmt/activity/css/jquery-ui.css" rel="stylesheet" />
+	<link href="http://dev.dcapi.net/media/dmt/activity/css/jquery-ui.theme.min.css" rel="stylesheet" />
+	<link href="http://dev.dcapi.net/media/dmt/activity/css/modal.css" rel="stylesheet" />
+	<link href="http://dev.dcapi.net/media/dmt/activity/css/jquery.jscrollpane.css" rel="stylesheet" />
+	<link href="http://dev.dcapi.net/media/dmt/activity/css/style.css" rel="stylesheet" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	<script src="http://dev.dcapi.net/media/dmt/activity/js/jquery-ui.min.js"></script>
+	<script src="http://dev.dcapi.net/media/dmt/activity/js/lc_switch.min.js"></script>
+	<script src="http://dev.dcapi.net/media/dmt/activity/js/jquery.caret.js"></script>
+	<script src="http://dev.dcapi.net/media/dmt/activity/js/jquery.ipaddress.js"></script>
+	<script src="http://dev.dcapi.net/media/dmt/activity/js/jquery.jscrollpane.min.js"></script>
+	<script src="http://dev.dcapi.net/media/dmt/activity/js/modal.js"></script>
+    <script>
+	//GLOBAL JS VARIABLES
+	var SENT_MIN = 0;
+	var SENT_MAX = 1000000;
+	var DELIVERED_MIN = {{ form.delivered_min.value }};
+	var DELIVERED_MAX = {{ form.delivered_max.value }};
+	var OPENED_MIN = {{ form.opened_min.value }};
+	var OPENED_MAX = {{ form.opened_max.value }};
+	var CLICKED_MIN = {{ form.clicked_min.value }};
+	var CLICKED_MAX = {{ form.clicked_max.value }};
+	var NOSPF_MIN = 0;
+	var NOSPF_MAX = 100;
+	var SBOUNCE_MIN = {{ form.bounced_min.value }};
+	var SBOUNCE_MAX = {{ form.bounced_max.value }};
+	var HBOUNCE_MIN = 0;
+	var HBOUNCE_MAX = 100;
+	var YAHOO_MIN = {{ form.yahoo_min.value }};
+	var YAHOO_MAX = {{ form.yahoo_max.value }};
+	var HOTMAIL_MIN = {{ form.hotmail_min.value }};
+	var HOTMAIL_MAX = {{ form.hotmail_max.value }};
+	var AOL_MIN = {{ form.aol_min.value }};
+	var AOL_MAX = {{ form.aol_max.value }};
+	var COMCAST_MIN = {{ form.comcast_min.value }};
+	var COMCAST_MAX = {{ form.comcast_max.value }};
+	var OTHER_MIN = {{ form.other_min.value }};
+	var OTHER_MAX = {{ form.other_max.value }};
+    var link_to_create_route = "{% url 'dmt:route-create' %}";
+    {% for id, val in routes.items %}
+    var link_to_edit_route_{{ id }} = "{% url 'dmt:route-edit' id %}";
+    var link_to_edit_ip_{{ id }} = "{% url 'dmt:ip-add' id %}";
+    var link_to_load_ip_exclude_{{ id }} = "{% url 'dmt:ip-exclude' id %}";
+
+    var link_to_sug_user_{{ id }} = "{% url 'dmt:sug-user' id %}";
+    var link_to_edit_user_{{ id }} = "{% url 'dmt:user-add' id %}";
+    var link_to_remove_user_{{ id }} = "{% url 'dmt:user-remove' id %}";
+    {% endfor %}
+    var link_to_load_ip_remove = "{% url 'dmt:ip-remove' %}";
+    var link_to_status_change_user = "{% url 'dmt:user-status-change' %}";
+    var edit_select = '';
+    var height_ip = 0;
+    var height_user = 0;
+	</script>
+	<script src="http://dev.dcapi.net/media/dmt/activity/js/onload.js"></script>
+<style>
+.ui-autocomplete {
+    display:none;
+    width:430px;
+    z-index:1001;
+}
+#alert_modal, #confirm_modal, #confirm_modal_exclude, #confirm_modal_first_add, #confirm_modal_second_add {
+    z-index: 1002;
+}
+</style>
+</head>
+<body>
+
+<header id="header">
+	<div id="logo">
+		<a href="/">
+			<b>Deliverability</b>
+			managment <span>tool</span>
+		</a>
+	</div>
+	<nav id="main_menu">
+		<ul>
+			<li><a href="#">DashBoard</a></li>
+			<li><a href="{% url 'dmt:route-activity' %}" class="active">Pool Activity</a></li>
+			<li><a href="#">Queue</a></li>
+			<li><a href="#">IP Management</a></li>
+			<li><a href="{% url 'dmt:user' %}">User Management</a></li>
+			<li><a href="#">Abuse</a></li>
+			<li><a href="#">Throttles Tab</a></li>
+			<li><a href="{% url 'dmt:route' %}">Pool Management</a></li>
+		</ul>
+	</nav>
+	<div id="profile_top">
+		<a href="#">Ivan Dyrkoff</a>
+	</div>
+	<div class="clr"></div>
+</header>
+
+<main>
+	<div class="main">
+        <form id="search_form" action="{% url 'dmt:route-activity' %}" method="get" onsubmit="prepareSearch()">{% csrf_token %}
+    		<div id="search_block">
+				<div id="search_wrap">
+					<input type="text" name="route" id="search" />
+					<button type="submit" id="search_sbmt">Search</button>
+				</div>
+    		</div>
+
+            <div id="filter_block" class="white_block">
+                <div class="title_block">
+                    <div class="title_left title_toggle">
+                        Filter <span class="down"></span>
+                    </div>
+                    <div class="clr"></div>
+                </div>
+                <div class="block_content">
+                    <div class="range_block">
+                        <div class="range_item_block">
+                            <div class="range_title">Date</div>
+                            <div class="range_values">&nbsp;</div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <input type="text" class="date_inp" value="{{ form.start.value }}" name="start" id="date_from" /><span class="date_sep">-</span>
+                                <input type="text" class="date_inp" value="{{ form.end.value }}" name="end" id="date_to" />
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title">Delivered</div>
+                            <div class="range_values">
+                                <span id="delivered_slider_values"></span>
+                                <input type="hidden" name="delivered_min" id="delivered_min" />
+                                <input type="hidden" name="delivered_max" id="delivered_max" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="delivered_slider"></div>
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title">Opened</div>
+                            <div class="range_values">
+                                <span id="opened_slider_values"></span>
+                                <input type="hidden" name="opened_min" id="opened_min" value="" />
+                                <input type="hidden" name="opened_max" id="opened_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="opened_slider"></div>
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title">Clicked</div>
+                            <div class="range_values">
+                                <span id="clicked_slider_values"></span>
+                                <input type="hidden" name="clicked_min" id="clicked_min" value="" />
+                                <input type="hidden" name="clicked_max" id="clicked_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="clicked_slider"></div>
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title">Bounce</div>
+                            <div class="range_values">
+                                <span id="sbounce_slider_values"></span>
+                                <input type="hidden" name="bounced_min" id="sbounce_min" value="" />
+                                <input type="hidden" name="bounced_max" id="sbounce_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="sbounce_slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="range_block">
+                        <div class="range_item_block">
+                            <div class="range_title" style="color:#4101af">Yahoo Score</div>
+                            <div class="range_values">
+                                <span id="yahoo_slider_values">5% - 33%</span>
+                                <input type="hidden" name="yahoo_min" id="yahoo_min" value="" />
+                                <input type="hidden" name="yahoo_max" id="yahoo_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="yahoo_slider"></div>
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title" style="color:#f57f20">HotMail Score</div>
+                            <div class="range_values">
+                                <span id="hotmail_slider_values">5% - 33%</span>
+                                <input type="hidden" name="hotmail_min" id="hotmail_min" value="" />
+                                <input type="hidden" name="hotmail_max" id="hotmail_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="hotmail_slider"></div>
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title" style="color:#005ba4">AOL Score</div>
+                            <div class="range_values">
+                                <span id="aol_slider_values">5% - 33%</span>
+                                <input type="hidden" name="aol_min" id="aol_min" value="" />
+                                <input type="hidden" name="aol_max" id="aol_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="aol_slider"></div>
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title" style="color:#dc2d3a">Comcast Score</div>
+                            <div class="range_values">
+                                <span id="comcast_slider_values">5% - 33%</span>
+                                <input type="hidden" name="comcast_min" id="comcast_min" value="" />
+                                <input type="hidden" name="comcast_max" id="comcast_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="comcast_slider"></div>
+                            </div>
+                        </div>
+                        <div class="range_item_block">
+                            <div class="range_title" style="color:#2a3d4d">Others Score</div>
+                            <div class="range_values">
+                                <span id="others_slider_values">5% - 33%</span>
+                                <input type="hidden" name="other_min" id="others_min" value="" />
+                                <input type="hidden" name="other_max" id="others_max" value="" />
+                            </div>
+                            <div class="clr"></div>
+                            <div class="range_wrapper">
+                                <div id="others_slider"></div>
+                            </div>
+                        </div>
+                        {# <1div class="range_item_block" style="text-align:right;margin-top:20px;"> #}
+                            {# <1input class="btn_small btn_blue" type="submit" value="Filter" style="border:none;" /> #}
+                        {# </div> #}
+                    </div>
+
+                    <div class="clr"></div>
+                </div>
+    		</div>
+        </form>
+
+		<div class="separator"></div>
+
+		<div id="content_block" class="white_block">
+			<div class="title_block">
+				<div class="title_left">
+					Pool Management
+				</div>
+<style>
+div.title_right a {
+    background:#35a6ba none repeat scroll 0 0;
+    color:#fff;
+    border:medium none;
+    border-radius:2px;
+    cursor:pointer;
+    display:inline-block;
+    font-size:14px;
+    font-weight:400;
+    height:24px;
+    line-height:24px;
+    padding:0 8px;
+    text-decoration:none;
+    text-transform:uppercase;
+    transition:all 0.2s ease-in-out 0s;
+    margin-right:20px;
+}
+div.title_right a:hover {
+	text-decoration:none;
+	color:#fff;
+	background:#1f8da0;
+}
+</style>
+				<div class="title_right">
+                    {% anchor CSV _("Save to CSV") %}
+					<a href="javascript:void(0);" class="btn_small btn_blue" onclick="javascript:openModalWindow(link_to_create_route, 'create_route_window');">Create new Route</a>
+				</div>
+				<div class="clr"></div>
+			</div>
+			<div class="block_content">
+				<table class="pool_tbl">
+					<thead>
+						<tr>
+							<th>{% anchor name _("Pool Name") %}</th>
+							<th>{% anchor ip_count _("IP`s") %}</th>
+							<th>{% anchor queued _("Sent") %}</th>
+							<th>{% anchor delivered _("Delivered") %}</th>
+							<th>{% anchor bounced _("Bounced") %}</th>
+							<th>{% anchor opened _("Opened") %}</th>
+							<th>{% anchor clicked _("Clicked") %}</th>
+							<th>{% anchor complained _("Complained") %}</th>
+							<th>{% anchor user_count _("Senders") %}</th>
+						</tr>
+					</thead>
+					<tbody>
+					{% for id, data in routes.items %}
+						<tr>
+							<td><a href="javascript:void(0);" onclick="javascript:openModalWindow(link_to_edit_route_{{ id }}, 'edit_route_window');">{{ data.name }}</a></td>
+							<td>{{ data.ip_count }}</td>
+							<td>{{ data.queued }}</td>
+							<td>{{ data.delivered }} ({{ data.delivered_perc }}%)</td>
+							<td>{{ data.bounced }} ({{ data.bounced_perc }}%)</td>
+							<td>{{ data.opened }} ({{ data.opened_perc }}%)</td>
+							<td>{{ data.clicked }} ({{ data.clicked_perc }}%)</td>
+							<td>{{ data.complained }} ({{ data.complained_perc }}%)</td>
+							<td>{% if data.user_count > 0 %}{{data.user_count }}{% else %}not assigned{% endif %}</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+<script>
+$(window).load(function(){
+if($(window).height()>($('header').height()+$('main').height()+$('footer').height())){
+$('main').height($(window).height()-($('header').height()+$('footer').height()+1));
+}
+});
+</script>
+</main>
+
+<footer id="footer">
+
+</footer>
+<!--===MODALS===-->
+
+<!--ROUTE CREATE-->
+<div class="modal_window middle_modal_window" id="create_route_window">
+    <div class="modal_window_top">
+        <div class="modal_window_title">Route Name</div>
+        <div class="modal_window_close">
+            <a href="javascript:void(0)" class="close_icon modal_close_link"></a>
+        </div>
+        <div class="clr"></div>
+    </div>
+    <div class="modal_content_wrapper modal_body">
+<!-- Include -->
+    </div>
+</div>
+
+<!--ROUTE EDIT-->
+<div class="modal_window middle_modal_window" id="edit_route_window" style="margin-left:-316px;width:708px;">
+    <div class="modal_window_top">
+        <div class="modal_window_title">Edit Pool</div>
+        <div class="modal_window_close">
+            <a href="javascript:void(0)" class="close_icon modal_close_link"></a>
+        </div>
+        <div class="clr"></div>
+    </div>
+    <div class="modal_content_wrapper modal_body" style="padding:0 34px 10px;">
+<!-- Include -->
+    </div>
+</div>
+
+<div id="shadow"></div>
+<div id="alert_shadow"></div>
+<div id="confirm_shadow"></div>
+</body>

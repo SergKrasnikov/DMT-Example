@@ -1,0 +1,2 @@
+{% for user in route.route_set.all %}domain-key default,{{ user.dkim_domain }},/opt/api/www/spool/pmta/{{ route.mta.mta_host }}/domainkeys/{{ user.dkim_domain }}
+{% endfor %}
